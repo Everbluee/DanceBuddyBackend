@@ -1,0 +1,19 @@
+from django.apps import AppConfig
+from django.contrib.auth import get_user_model
+from django.db.models.signals import post_migrate
+
+
+def create_superuser(sender, **kwargs):
+    user = get_user_model()
+    if not user.objects.filter(username='user0').exists():
+        user.objects.create_user('user0', 'user@example.com', 'password')
+    if not user.objects.filter(username='admin').exists():
+        user.objects.create_superuser('admin', 'admin@example.com', 'adminpassword')
+
+
+class BasicBackendConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'BasicBackend'
+
+    def ready(self):
+        post_migrate.connect(create_superuser)

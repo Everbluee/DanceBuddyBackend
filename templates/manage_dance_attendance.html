@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Dance Class Attendance</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container my-5">
+    <h1 class="text-center">Manage Attendance for "{{ attendances.0.dance_class.title }}"</h1>
+    <p class="text-center">Level: {{ attendances.0.dance_class.get_level_display }}</p>
+    <div class="table-responsive mt-4">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>User</th>
+                <th>Status</th>
+                <th>Last Updated</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for attendance in attendances %}
+                <tr>
+                    <td>{{ attendance.user.get_full_name }}</td>
+                    <td>
+                            <span class="badge 
+                                {% if attendance.status == 'present' %} bg-success
+                                {% elif attendance.status == 'absent' %} bg-danger
+                                {% elif attendance.status == 'late' %} bg-warning
+                                {% else %} bg-secondary
+                                {% endif %}
+                            ">
+                                {{ attendance.get_status_display }}
+                            </span>
+                    </td>
+                    <td>{{ attendance.updated_at|date:"M d, Y - H:i" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">No attendance records found.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <a href="{% url 'dashboard' %}" class="btn btn-primary mt-3">Back to Dashboard</a>
+</div>
+</body>
+</html>

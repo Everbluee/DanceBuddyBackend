@@ -1,0 +1,33 @@
+{% extends 'base_generic.html' %}
+{% block title %}Instructor Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="display-4 text-center">Welcome, Instructor {{ request.user.username }}!</h1>
+    <p class="lead text-center">Manage your classes and events efficiently.</p>
+
+    <div class="card-deck mt-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Manage Dance Classes</h5>
+                <p class="card-text">Create, update, and manage dance classes.</p>
+                <a href="{% url 'get_dance_class' %}" class="btn btn-warning">Manage Classes</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Attendance</h5>
+                <p class="card-text">Mark and view attendance for classes.</p>
+                <a href="#" class="btn btn-primary">Manage Attendance</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Event Management</h5>
+                <p class="card-text">Organize and oversee dance events.</p>
+                <a href="{% url 'get_event' %}" class="btn btn-info">Manage Events</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

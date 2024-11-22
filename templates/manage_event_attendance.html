@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container my-5">
+        <h1 class="text-center">Welcome, {{ user.get_full_name }}</h1>
+        
+        {% if instructed_classes %}
+            <h2>Your Classes</h2>
+            <ul>
+                {% for dance_class in instructed_classes %}
+                    <li>
+                        <a href="{% url 'manage_dance_class_attendance' class_id=dance_class.id %}">
+                            {{ dance_class.title }} - {{ dance_class.get_level_display }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        {% if enrolled_classes %}
+            <h2>Your Enrolled Classes</h2>
+            <ul>
+                {% for dance_class in enrolled_classes %}
+                    <li>{{ dance_class.title }} - {{ dance_class.get_level_display }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        {% if upcoming_events %}
+            <h2>Upcoming Events</h2>
+            <ul>
+                {% for event in upcoming_events %}
+                    <li>
+                        <a href="{% url 'manage_event_attendance' event_id=event.id %}">
+                            {{ event.title }} - {{ event.date|date:"M d, Y" }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No upcoming events.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

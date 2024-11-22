@@ -26,6 +26,71 @@ body {
     object-fit: cover;
 }
 
-footer {
-    background-color: #343a40;
+.footer-primary {
+    background: linear-gradient(120deg, #7c34c1, #e88ec9);
+    color: #ffffff;
+}
+
+.navbar-primary {
+    background: linear-gradient(120deg, #7c34c1, #e88ec9);
+    color: #ffffff;
+}
+
+/* Subtle or Solid Color Buttons */
+.btn-primary-solid {
+    background-color: #7c34c1; /* Solid primary color */
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+}
+
+.btn-primary-solid:hover {
+    background-color: #6a2ca0; /* Slightly darker */
+    color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary-solid {
+    background-color: #e88ec9; /* Solid secondary color */
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+}
+
+.btn-secondary-solid:hover {
+    background-color: #d87bb6; /* Slightly darker */
+    color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Subtle Gradient Option */
+.btn-primary-subtle {
+    background: linear-gradient(120deg, #7c34c1 98%, #6a2ca0 2%); /* Barely visible gradient */
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+}
+
+.btn-primary-subtle:hover {
+    background: linear-gradient(120deg, #6a2ca0 98%, #7c34c1 2%); /* Reverse subtle gradient */
+    color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }

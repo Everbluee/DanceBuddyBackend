@@ -3,7 +3,9 @@ from django.urls import path, include
 from django.conf import settings
 
 from django.contrib.auth import views as auth_views
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views import *
+
 
 dance_class_patterns = [
     path('', get_data_dance_class, name='get_dance_class'),
@@ -54,4 +56,6 @@ urlpatterns = [
     path('attendance/', include(attendance_patterns)),
     path('user/dashboard/', user_dashboard, name='user_dashboard'),
     path('instructor/dashboard/', instructor_dashboard, name='instructor_dashboard'),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

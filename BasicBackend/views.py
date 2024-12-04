@@ -3,9 +3,9 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from rest_framework import status
-
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
 from .serializers import *
 
 
@@ -167,7 +167,7 @@ def is_instructor(user):
 @user_passes_test(is_instructor)
 def manage_dance_class_attendance(request, class_id):
     dance_class = get_object_or_404(DanceClass, id=class_id)
-    attendances = ClassAttendance.objects.filter(dance_class=dance_class)
+    attendances = DanceClassAttendance.objects.filter(dance_class=dance_class)
     return render(request, 'manage_dance_attendance.html', {'attendances': attendances})
 
 
@@ -189,7 +189,7 @@ def mark_dance_class_attendance(request, class_id, user_id, status):
     if status not in valid_statuses:
         return JsonResponse({'error': 'Invalid status'}, status=400)
 
-    attendance, created = ClassAttendance.objects.get_or_create(user=user, dance_class=dance_class)
+    attendance, created = DanceClassAttendance.objects.get_or_create(user=user, dance_class=dance_class)
     attendance.status = status
     attendance.save()
 
@@ -216,6 +216,7 @@ def mark_event_attendance(request, event_id, user_id, status):
 def home(request):
     return render(request, 'home.html')
 
+
 def custom_login(request):
     print('custom login')
     if request.method == 'POST':
@@ -234,6 +235,7 @@ def custom_login(request):
 
     print('not logged in')
     return render(request, 'registration/login.html')
+
 
 @login_required
 def user_dashboard(request):

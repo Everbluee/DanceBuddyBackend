@@ -1,6 +1,7 @@
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser, Group
 from django.db import models
+from multiselectfield import MultiSelectField
 
 
 class BaseAttendance(models.Model):
@@ -11,7 +12,8 @@ class BaseAttendance(models.Model):
         ('late', 'Late'),
     ]
 
-    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name="%(class)s_attendances", db_constraint=False)
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name="%(class)s_attendances",
+                             db_constraint=False)
     status = models.CharField(max_length=10, choices=ATTENDANCE_STATUS_CHOICES, default='pending')
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -20,38 +22,6 @@ class BaseAttendance(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.get_status_display()}"
-
-
-class DanceClass(models.Model):
-    LEVEL_CHOICES = [
-        ('beginner', 'Begginner'),
-        ('intermediate', 'Intermediate'),
-        ('advanced', 'Advanced'),
-    ]
-
-    title = models.CharField(max_length=100)
-    level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='beginner')
-    description = models.TextField()
-    time = models.TimeField()
-    days = models.TextField(max_length=100)  # Example: Monday, Tuesday
-    users = models.ManyToManyField('User', through='ClassAttendance', related_name='dance_classes')
-    instructor = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='instructed_classes')
-
-    def __str__(self):
-        return f"{self.title} ({self.level})"
-
-
-class Event(models.Model):
-    title = models.CharField(max_length=100)
-    description = models.TextField()
-    time = models.TimeField()
-    date = models.DateField()
-    location = models.TextField(max_length=100)
-    image = models.ImageField(upload_to='events/', null=True, blank=True)
-    users = models.ManyToManyField('User', through='EventAttendance', related_name='events')
-
-    def __str__(self):
-        return self.title
 
 
 class User(AbstractUser):
@@ -68,7 +38,46 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
 
-class ClassAttendance(BaseAttendance):
+# CLASS MODELS
+class DanceClass(models.Model):
+    LEVEL_CHOICES = [
+        ('beginner', 'Begginner'),
+        ('intermediate', 'Intermediate'),
+        ('advanced', 'Advanced')
+    ]
+    DAY_CHOICES = [
+        ('monday', 'Monday'),
+        ('tuesday', 'Tuesday'),
+        ('wednesday', 'Wednesday'),
+        ('thursday', 'Thursday'),
+        ('friday', 'Friday')
+    ]
+
+    title = models.CharField(max_length=100)
+    level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='beginner')
+    description = models.TextField()
+    time = models.TimeField()
+    days = MultiSelectField(choices=DAY_CHOICES)
+    users = models.ManyToManyField('User', through='DanceClassAssignment', related_name='dance_classes')
+    instructor = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name='instructed_classes')
+
+    def __str__(self):
+        return f"{self.title} ({self.level})"
+
+
+class DanceClassAssignment(models.Model):
+    dance_class = models.ForeignKey(DanceClass, on_delete=models.CASCADE, related_name='dance_class_assignments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_dance_class_assignments')
+
+    class Meta:
+        unique_together = ('dance_class', 'user')
+
+    def __str__(self):
+        return f"{self.user.username} assigned to {self.dance_class.title}"
+
+
+class DanceClassAttendance(BaseAttendance):
     dance_class = models.ForeignKey(DanceClass, on_delete=models.CASCADE, related_name="class_attendances")
 
     class Meta:
@@ -76,6 +85,31 @@ class ClassAttendance(BaseAttendance):
 
     def __str__(self):
         return f"{self.user.username} - {self.dance_class.title} - {self.status}"
+
+
+# EVENTS MODELS
+class Event(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    time = models.TimeField()
+    date = models.DateField()
+    location = models.TextField(max_length=100)
+    image = models.ImageField(upload_to='events/', null=True, blank=True)
+    users = models.ManyToManyField('User', through='EventAssignment', related_name='events')
+
+    def __str__(self):
+        return self.title
+
+
+class EventAssignment(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='event_assignments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_event_assignments')
+
+    class Meta:
+        unique_together = ('event', 'user')
+
+    def __str__(self):
+        return f"{self.user.username} assigned to {self.event.title}"
 
 
 class EventAttendance(BaseAttendance):

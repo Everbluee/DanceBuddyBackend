@@ -13,14 +13,8 @@ class UserSerializer(serializers.ModelSerializer):
         return obj.image.url
 
 
-class UserInClassSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = get_user_model()
-        fields = ['id', 'first_name', 'last_name']
-
-
 class DanceClassSerializer(serializers.ModelSerializer):
-    users = UserInClassSerializer(many=True, read_only=True)
+    users = UserSerializer(many=True, read_only=True)
 
     class Meta:
         model = DanceClass

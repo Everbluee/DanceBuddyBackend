@@ -5,10 +5,14 @@ from django.db.models.signals import post_migrate
 
 def create_superuser(sender, **kwargs):
     user = get_user_model()
-    if not user.objects.filter(username='user0').exists():
-        user.objects.create_user('user0', 'user@example.com', 'password')
     if not user.objects.filter(username='admin').exists():
-        user.objects.create_superuser('admin', 'admin@example.com', 'adminpassword')
+        user.objects.create_superuser(
+            username='admin',
+            email='admin@example.com',
+            password='adminpassword',
+            first_name='admin',
+            last_name='admin'
+        )
 
 
 class BasicBackendConfig(AppConfig):

@@ -214,7 +214,8 @@ def mark_event_attendance(request, event_id, user_id, status):
 
 
 def home(request):
-    return render(request, 'home.html')
+    is_user_instructor = is_instructor(request.user)
+    return render(request, 'home.html', {'is_instructor': is_user_instructor})
 
 
 def custom_login(request):
@@ -243,6 +244,6 @@ def user_dashboard(request):
 
 
 @login_required
-@user_passes_test(lambda u: u.groups.filter(name='Instructor').exists())
+@user_passes_test(is_instructor)
 def instructor_dashboard(request):
     return render(request, 'instructor_dashboard.html')

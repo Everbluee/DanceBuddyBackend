@@ -1,7 +1,6 @@
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -216,26 +215,6 @@ def mark_event_attendance(request, event_id, user_id, status):
 def home(request):
     is_user_instructor = is_instructor(request.user)
     return render(request, 'home.html', {'is_instructor': is_user_instructor})
-
-
-def custom_login(request):
-    print('custom login')
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        print(username, password)
-        user = authenticate(request, username=username, password=password)
-        print("is authenticated?" + user.is_authenticated)
-        if user is not None:
-            login(request, user)
-            print("logged in.")
-            return redirect('home')  # Replace 'home' with your desired redirect
-        else:
-            print("not logged in.")
-            return render(request, 'registration/login.html', {'error': 'Invalid username or password'})
-
-    print('not logged in')
-    return render(request, 'registration/login.html')
 
 
 @login_required

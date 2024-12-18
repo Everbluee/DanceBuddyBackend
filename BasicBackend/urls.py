@@ -47,7 +47,7 @@ attendance_patterns = [
 urlpatterns = [
     path('', home, name='home'),
     path('user/', include('django.contrib.auth.urls')),
-    path('user/login/', custom_login, name='login'),
+                  path('user/login/', auth_views.LoginView.as_view(), name='login'),
     path('user/logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('api/dance_class/', include(dance_class_patterns)),
     path('api/event/', include(event_patterns)),

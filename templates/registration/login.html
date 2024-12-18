@@ -15,7 +15,7 @@
             <h1>DanceBuddy</h1>
             <p>Please log in to continue</p>
         </div>
-        <form method="post">
+        <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="id_username" class="form-label">Username</label>
@@ -25,6 +25,13 @@
                 <label for="id_password" class="form-label">Password</label>
                 <input type="password" name="password" class="form-control" id="id_password" required>
             </div>
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <p>Please enter a correct username and password.</p>
+                </div>
+            {% endif %}
+
             <button type="submit" class="btn btn-primary w-100">Login</button>
         </form>
         <p class="text-center mt-3">

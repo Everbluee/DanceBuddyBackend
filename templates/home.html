@@ -19,7 +19,8 @@
                         <div class="card-body">
                             <h5 class="card-title">Admin Dashboard</h5>
                             <p class="card-text">Manage users, monitor system health, and perform admin tasks.</p>
-                            <a href="http://127.0.0.1:8000/admin" class="btn btn-secondary-solid">Go to Admin Dashboard</a>
+                            <a href="http://127.0.0.1:8000/admin" class="btn btn-primary-subtle">Go to Admin
+                                Dashboard</a>
                         </div>
                     </div>
                     {% elif is_instructor %}
@@ -27,7 +28,8 @@
                         <div class="card-body">
                             <h5 class="card-title">Instructor Dashboard</h5>
                             <p class="card-text">Manage dance classes, attendance, and more.</p>
-                            <a href="http://127.0.0.1:8000/instructor/dashboard" class="btn btn-primary-solid">Go to Instructor Dashboard</a>
+                            <a href="{% url 'dashboard' %}" class="btn btn-primary-subtle">Go to Instructor
+                                Dashboard</a>
                         </div>
                     </div>
                     {% else %}
@@ -35,7 +37,7 @@
                         <div class="card-body">
                             <h5 class="card-title">User Dashboard</h5>
                             <p class="card-text">View your events, track progress, and more.</p>
-                            <a href="http://127.0.0.1:8000/user/dashboard/" class="btn btn-primary-subtle">Go to User Dashboard</a>
+                            <a href="{% url 'dashboard' %}" class="btn btn-primary-subtle">Go to User Dashboard</a>
                         </div>
                     </div>
                     {% endif %}

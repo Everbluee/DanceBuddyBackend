@@ -247,3 +247,13 @@ def user_dashboard(request):
 @user_passes_test(is_instructor)
 def instructor_dashboard(request):
     return render(request, 'instructor_dashboard.html')
+
+
+@login_required
+def dashboard(request):
+    is_user_instructor = is_instructor(request.user)
+
+    if is_user_instructor:
+        return render(request, 'instructor_dashboard.html')
+    else:
+        return render(request, 'user_dashboard.html')

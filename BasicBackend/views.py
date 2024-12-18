@@ -239,11 +239,10 @@ def custom_login(request):
 
 
 @login_required
-def user_dashboard(request):
-    return render(request, 'user_dashboard.html')
+def dashboard(request):
+    is_user_instructor = is_instructor(request.user)
 
-
-@login_required
-@user_passes_test(is_instructor)
-def instructor_dashboard(request):
-    return render(request, 'instructor_dashboard.html')
+    if is_user_instructor:
+        return render(request, 'instructor_dashboard.html')
+    else:
+        return render(request, 'user_dashboard.html')

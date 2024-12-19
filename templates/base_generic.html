@@ -7,12 +7,14 @@
     <title>{% block title %}My Application{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/card.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
 </head>
 <body class="d-flex flex-column min-vh-100">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-primary">
         <div class="container">
-            <a class="navbar-brand" href="/">DanceBuddy</a>
+            <a class="navbar-brand brand-title-text" href="/">DanceBuddy</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -20,6 +22,9 @@
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item active">
                         <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
                     </li>
                     <li class="nav-item">
                         {% if request.user.is_authenticated %}
@@ -34,14 +39,18 @@
     </nav>
 
     <!-- Content -->
-    <div class="container mt-4 flex-grow-1">
-        {% block content %}
-        {% endblock %}
+    <div class="container-fluid mt-4 flex-grow-1">
+        <div class="d-flex justify-content-between">
+            {% block sidebar %}
+            {% endblock %}
+            {% block content %}
+            {% endblock %}
+        </div>
     </div>
 
     <!-- Footer -->
     <footer class="footer {{ footer_class|default:'footer-primary' }} text-white text-center py-3 mt-5">
-        <p>&copy; 2024 My Application. All rights reserved.</p>
+        <p>&copy; 2024 DanceBuddy. All rights reserved.</p>
     </footer>
 
     <!-- Scripts -->

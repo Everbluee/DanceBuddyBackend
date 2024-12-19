@@ -1,49 +1,53 @@
 {% extends 'base_generic.html' %}
 {% block title %}Instructor Dashboard{% endblock %}
 
-{% block content %}
-<div class="container mt-5">
-    <h1 class="display-4 text-center">Welcome,
-        Instructor {{ request.user.first_name }} {{ request.user.last_name }}!</h1>
-    <p class="lead text-center">Manage your classes and events efficiently.</p>
+{% block sidebar %}
+    {% include 'instructor_sidebar.html' %}
+{% endblock %}
 
-    <div class="card-deck mt-4">
-        <div class="card-container">
-            <div class="card-inner">
-                <div class="card-front">
-                    <h5 class="card-title">Manage Dance Classes</h5>
+{% block content %}
+    <div class="align-content-center container-fluid mt-4">
+        <h1 class="display-4 text-center">Welcome,
+            Instructor {{ request.user.first_name }} {{ request.user.last_name }}!</h1>
+        <p class="lead text-center">Manage your classes and events efficiently.</p>
+
+        <div class="card-deck mt-4">
+            <div class="card-container">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <h5 class="card-title">Dance Classes Management</h5>
+                    </div>
+                    <a href="{% url 'manage_dance_classes' %}" class="card-back text-decoration-none">
+                        <h5 class="card-title">Dance Classes Management</h5>
+                        <p class="card-text">View, manage and update attendance in your dance classes.</p>
+                        <p class="lead card-text">Click!</p>
+                    </a>
                 </div>
-                <a href="{% url 'get_dance_class' %}" class="card-back text-decoration-none">
-                    <h5 class="card-title">Manage Dance Classes</h5>
-                    <p class="card-text">Create, update, and manage dance classes.</p>
-                    <p class="card-text">Click!</p>
-                </a>
             </div>
-        </div>
-        <div class="card-container">
-            <div class="card-inner">
-                <div class="card-front">
-                    <h5 class="card-title">Attendance</h5>
+            {#            <div class="card-container">#}
+            {#                <div class="card-inner">#}
+            {#                    <div class="card-front">#}
+            {#                        <h5 class="card-title">Attendance</h5>#}
+            {#                    </div>#}
+            {#                    <a href="#" class="card-back text-decoration-none">#}
+            {#                        <h5 class="card-title">Attendance</h5>#}
+            {#                        <p class="card-text">Mark and view attendance for classes and events.</p>#}
+            {#                        <p class="lead card-text">Click!</p>#}
+            {#                    </a>#}
+            {#                </div>#}
+            {#            </div>#}
+            <div class="card-container">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <h5 class="card-title">Events Management</h5>
+                    </div>
+                    <a href="{% url 'manage_events' %}" class="card-back text-decoration-none">
+                        <h5 class="card-title">Events Management</h5>
+                        <p class="card-text">Manage and oversee dance events for your dancers.</p>
+                        <p class="lead card-text">Click!</p>
+                    </a>
                 </div>
-                <a href="#" class="card-back text-decoration-none">
-                    <h5 class="card-title">Attendance</h5>
-                    <p class="card-text">Mark and view attendance for classes and events.</p>
-                    <p class="card-text">Click!</p>
-                </a>
-            </div>
-        </div>
-        <div class="card-container">
-            <div class="card-inner">
-                <div class="card-front">
-                    <h5 class="card-title">Event Management</h5>
-                </div>
-                <a href="{% url 'get_event' %}" class="card-back text-decoration-none">
-                    <h5 class="card-title">Event Management</h5>
-                    <p class="card-text">Organize and oversee dance events for your dancers.</p>
-                    <p class="card-text">Click!</p>
-                </a>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

@@ -192,7 +192,8 @@ def mark_dance_class_attendance(request, class_id, user_id, status):
     attendance.status = status
     attendance.save()
 
-    return JsonResponse({'message': f'Attendance updated to {status} for {user.username} in Dance Class'})
+    return JsonResponse(
+        {'message': f'Attendance updated to {status} for {user.first_name} {user.last_name} in Dance Class'})
 
 
 @login_required
@@ -209,7 +210,7 @@ def mark_event_attendance(request, event_id, user_id, status):
     event_attendance.status = status
     event_attendance.save()
 
-    return JsonResponse({'message': f'Attendance updated to {status} for {user.username} in Event'})
+    return JsonResponse({'message': f'Attendance updated to {status} for {user.first_name} {user.last_name} in Event'})
 
 
 def home(request):
@@ -225,3 +226,15 @@ def dashboard(request):
         return render(request, 'instructor_dashboard.html')
     else:
         return render(request, 'user_dashboard.html')
+
+
+def manage_dance_classes(request):
+    return render(request, 'manage_dance_classes.html')
+
+
+def manage_attendance(request):
+    return render(request, 'manage_attendance.html')
+
+
+def manage_events(request):
+    return render(request, 'manage_events.html')

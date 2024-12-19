@@ -32,6 +32,7 @@ user_patterns = [
 ]
 
 attendance_patterns = [
+    path('', manage_attendance, name='manage_attendance'),
     path('danceclass/<int:class_id>/', manage_dance_class_attendance,
          name='manage_dance_class_attendance'),
     path('danceclass/<int:class_id>/mark/<int:user_id>/<str:status>/', mark_dance_class_attendance,
@@ -43,6 +44,11 @@ attendance_patterns = [
          name='mark_event_attendance'),
 ]
 
+management_patterns = [
+    path('dance_class/', manage_dance_classes, name='manage_dance_classes'),
+    path('attendance/', include(attendance_patterns)),
+    path('event/', manage_events, name='manage_events'),
+]
 
 urlpatterns = [
     path('', home, name='home'),
@@ -52,8 +58,8 @@ urlpatterns = [
     path('api/dance_class/', include(dance_class_patterns)),
     path('api/event/', include(event_patterns)),
     path('api/user/', include(user_patterns)),
-    path('attendance/', include(attendance_patterns)),
                   path('dashboard/', dashboard, name='dashboard'),
+                  path('management/', include(management_patterns)),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -10,33 +10,33 @@
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
 <body>
-    <div class="login-card">
-        <div class="login-header">
-            <h1>DanceBuddy</h1>
-            <p>Please log in to continue</p>
-        </div>
-        <form method="post" action="{% url 'login' %}">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="id_username" class="form-label">Username</label>
-                <input type="text" name="username" class="form-control" id="id_username" required>
-            </div>
-            <div class="mb-3">
-                <label for="id_password" class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" id="id_password" required>
-            </div>
-
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger">
-                    <p>Please enter a correct username and password.</p>
-                </div>
-            {% endif %}
-
-            <button type="submit" class="btn btn-primary w-100">Login</button>
-        </form>
-        <p class="text-center mt-3">
-            <a href="{% url 'password_reset' %}" class="text-decoration-none text-link">Forgot Password?</a>
-        </p>
+<div class="login-card">
+    <div class="login-header">
+        <h1>DanceBuddy</h1>
+        <p>Please log in to continue</p>
     </div>
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_username" class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" id="id_username" required>
+        </div>
+        <div class="mb-3">
+            <label for="id_password" class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" id="id_password" required>
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                <p>Please enter a correct username and password.</p>
+            </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary w-100">Login</button>
+    </form>
+    <p class="text-center mt-3">
+        <a href="{% url 'password_reset' %}" class="text-decoration-none text-link">Forgot Password?</a>
+    </p>
+</div>
 </body>
 </html>

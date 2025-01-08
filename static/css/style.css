@@ -58,7 +58,7 @@ body {
 
 /* Subtle Gradient Option */
 .btn-primary-subtle {
-    background: linear-gradient(120deg, #7c34c1 98%, #6a2ca0 2%);
+    background: linear-gradient(120deg, #7c34c1 98%, #592585 2%);
     color: #ffffff;
     border: none;
     padding: 10px 20px;
@@ -70,8 +70,45 @@ body {
 }
 
 .btn-primary-subtle:hover {
-    background: linear-gradient(120deg, #6a2ca0 98%, #7c34c1 2%);
+    background: linear-gradient(120deg, #512279 98%, #7c34c1 2%);
     color: #ffffff;
     transform: translateY(-3px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary-subtle-sm {
+    background: #7c34c1;
+    color: #ffffff;
+    border: none;
+    padding: 5px 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+}
+
+.btn-primary-subtle-sm:hover {
+    background: #512279;
+    color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary-subtle-sm:focus {
+    outline: none;
+}
+
+
+.custom-select {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem; /* rounded corners */
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.custom-select:focus {
+    border-color: #7c34c1;
+    box-shadow: 0 0 0 0.25rem rgba(89, 37, 134, 0.4);
+    outline: none;
 }

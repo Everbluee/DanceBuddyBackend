@@ -32,16 +32,8 @@ user_patterns = [
 ]
 
 attendance_patterns = [
-    path('', manage_attendance, name='manage_attendance'),
-    path('danceclass/<int:class_id>/', manage_dance_class_attendance,
-         name='manage_dance_class_attendance'),
-    path('danceclass/<int:class_id>/mark/<int:user_id>/<str:status>/', mark_dance_class_attendance,
-         name='mark_dance_class_attendance'),
-
-    path('event/<int:event_id>/', manage_event_attendance,
-         name='manage_event_attendance'),
-    path('event/<int:event_id>/mark/<int:user_id>/<str:status>/', mark_event_attendance,
-         name='mark_event_attendance'),
+    path('dance_class/<int:class_id>/save_attendance/', save_dance_class_attendance,
+         name='save_dance_class_attendance'),
 ]
 
 management_patterns = [

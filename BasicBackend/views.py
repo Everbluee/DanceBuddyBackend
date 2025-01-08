@@ -1,6 +1,7 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -164,53 +165,28 @@ def is_instructor(user):
 
 @login_required
 @user_passes_test(is_instructor)
-def manage_dance_class_attendance(request, class_id):
-    dance_class = get_object_or_404(DanceClass, id=class_id)
-    attendances = DanceClassAttendance.objects.filter(dance_class=dance_class)
-    return render(request, 'manage_dance_attendance.html', {'attendances': attendances})
+def save_dance_class_attendance(request, class_id):
+    if request.method == "POST":
+        dance_class = get_object_or_404(DanceClass, id=class_id)
 
+        if dance_class.instructor != request.user:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
 
-@login_required
-@user_passes_test(is_instructor)
-def manage_event_attendance(request, event_id):
-    event = get_object_or_404(Event, id=event_id)
-    event_attendances = EventAttendance.objects.filter(event=event)
-    return render(request, 'manage_event_attendance.html', {'event_attendances': event_attendances})
+        for key, value in request.POST.items():
+            if key.startswith("attendances-"):
+                user_id = key.split("-")[1]
+                try:
+                    user = User.objects.get(id=user_id)
+                    attendance, created = DanceClassAttendance.objects.get_or_create(user=user, dance_class=dance_class)
+                    attendance.status = value
+                    attendance.save()
+                except User.DoesNotExist:
+                    continue
 
+        messages.success(request, "Attendance successfully saved!")
+        return redirect('manage_dance_classes')
 
-@login_required
-@user_passes_test(is_instructor)
-def mark_dance_class_attendance(request, class_id, user_id, status):
-    dance_class = get_object_or_404(DanceClass, id=class_id)
-    user = get_object_or_404(User, id=user_id)
-
-    valid_statuses = ['pending', 'present', 'absent', 'late']
-    if status not in valid_statuses:
-        return JsonResponse({'error': 'Invalid status'}, status=400)
-
-    attendance, created = DanceClassAttendance.objects.get_or_create(user=user, dance_class=dance_class)
-    attendance.status = status
-    attendance.save()
-
-    return JsonResponse(
-        {'message': f'Attendance updated to {status} for {user.first_name} {user.last_name} in Dance Class'})
-
-
-@login_required
-@user_passes_test(is_instructor)
-def mark_event_attendance(request, event_id, user_id, status):
-    event = get_object_or_404(Event, id=event_id)
-    user = get_object_or_404(User, id=user_id)
-
-    valid_statuses = ['pending', 'present', 'absent', 'late']
-    if status not in valid_statuses:
-        return JsonResponse({'error': 'Invalid status'}, status=400)
-
-    event_attendance, created = EventAttendance.objects.get_or_create(user=user, event=event)
-    event_attendance.status = status
-    event_attendance.save()
-
-    return JsonResponse({'message': f'Attendance updated to {status} for {user.first_name} {user.last_name} in Event'})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
 def home(request):
@@ -228,12 +204,17 @@ def dashboard(request):
         return render(request, 'user_dashboard.html')
 
 
+@login_required
+@user_passes_test(is_instructor)
 def manage_dance_classes(request):
-    return render(request, 'manage_dance_classes.html')
+    instructor_classes = DanceClass.objects.filter(instructor=request.user)
 
+    for dance_class in instructor_classes:
+        dance_class.participants_list = dance_class.users.all()
 
-def manage_attendance(request):
-    return render(request, 'manage_attendance.html')
+    return render(request, 'manage_dance_classes.html', {
+        'instructor_classes': instructor_classes,
+    })
 
 
 def manage_events(request):

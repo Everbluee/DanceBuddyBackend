@@ -1,17 +1,101 @@
 {% extends 'base_generic.html' %}
 
-{% block title %}Dance Classes Management{% endblock %}
+{% block title %}Manage Dance Classes{% endblock %}
 
 {% block sidebar %}
     {% include 'instructor_sidebar.html' %}
 {% endblock %}
 
 {% block content %}
-    <div class="d-flex align-content-center w-100">
-        <div class="container mt-2">
-            <h1 class="display-4 text-center">Dance Classes Management</h1>
-            <p class="lead text-center">View, manage and update attendance in your dance classes.</p>
-            <p class="text-center">This is where you can manage your dance classes.</p>
+    <div class="container mt-4">
+        <h1 class="text-center">Manage Dance Classes</h1>
+        <table class="table mt-4">
+            <thead>
+            <tr>
+                <th>Class</th>
+                <th>Level</th>
+                <th>Days</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for dance_class in instructor_classes %}
+                <tr>
+                    <td>{{ dance_class.title }}</td>
+                    <td>{{ dance_class.level.capitalize }}</td>
+                    <td>{{ dance_class.days }}</td>
+                    <td>{{ dance_class.description }}</td>
+                    <td>
+                        <button class="btn-primary-subtle-sm"
+                                onclick="toggleParticipants('participants-table-{{ dance_class.id }}', 'participants-title-{{ dance_class.id }}')">
+                            Show Participants
+                        </button>
+
+                        <button class="btn-primary-subtle-sm">
+                            Attendance
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div id="participants-tables-container">
+            {% for dance_class in instructor_classes %}
+                <div id="participants-section-{{ dance_class.id }}" style="margin-top: 20px;">
+                    <h3 id="participants-title-{{ dance_class.id }}" style="display: none;">
+                        Participants for {{ dance_class.title }} ({{ dance_class.level }})
+                    </h3>
+
+                    <table id="participants-table-{{ dance_class.id }}" class="table table-bordered"
+                           style="display: none;">
+                        <thead>
+                        <tr>
+                            <th>First name</th>
+                            <th>Last name</th>
+                            <th>Email</th>
+                            <th>Phone number</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% if dance_class.users %}
+                            {% for user in dance_class.users.all %}
+                                <tr>
+                                    <td>{{ user.first_name }}</td>
+                                    <td>{{ user.last_name }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.phone_number }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4">No participants</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4">No participants</td>
+                            </tr>
+                        {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endfor %}
         </div>
     </div>
+
+    <script>
+        function toggleParticipants(tableId, titleId) {
+            const table = document.getElementById(tableId);
+            const title = document.getElementById(titleId);
+
+            if (table.style.display === "none") {
+                table.style.display = "table";
+                title.style.display = "block";
+            } else {
+                table.style.display = "none";
+                title.style.display = "none";
+            }
+        }
+    </script>
 {% endblock %}

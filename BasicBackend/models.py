@@ -79,12 +79,13 @@ class DanceClassAssignment(models.Model):
 
 class DanceClassAttendance(BaseAttendance):
     dance_class = models.ForeignKey(DanceClass, on_delete=models.CASCADE, related_name="class_attendances")
+    session_date = models.DateTimeField()
 
     class Meta:
-        unique_together = ('user', 'dance_class')
+        unique_together = ('user', 'dance_class', 'session_date')
 
     def __str__(self):
-        return f"{self.user.username} - {self.dance_class.title} - {self.status}"
+        return f"{self.user.username} - {self.dance_class.title} - {self.session_date} - {self.status}"
 
 
 # EVENTS MODELS

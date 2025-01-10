@@ -79,7 +79,7 @@ class DanceClassAssignment(models.Model):
 
 class DanceClassAttendance(BaseAttendance):
     dance_class = models.ForeignKey(DanceClass, on_delete=models.CASCADE, related_name="class_attendances")
-    session_date = models.DateTimeField()
+    session_date = models.DateField()
 
     class Meta:
         unique_together = ('user', 'dance_class', 'session_date')

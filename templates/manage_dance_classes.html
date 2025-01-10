@@ -1,4 +1,6 @@
 {% extends 'base_generic.html' %}
+{% load static %}
+{% load attendance_filter %}
 
 {% block title %}Manage Dance Classes{% endblock %}
 
@@ -28,12 +30,13 @@
                     <td>{{ dance_class.description }}</td>
                     <td>
                         <button class="btn-primary-subtle-sm"
-                                onclick="toggleParticipants('participants-table-{{ dance_class.id }}', 'participants-title-{{ dance_class.id }}')">
+                                onclick="toggleTable('participants-table-{{ dance_class.id }}', 'participants-title-{{ dance_class.id }}')">
                             Show Participants
                         </button>
 
-                        <button class="btn-primary-subtle-sm">
-                            Attendance
+                        <button class="btn-primary-subtle-sm"
+                                onclick="toggleTable('attendance-table-{{ dance_class.id }}', 'attendance-title-{{ dance_class.id }}')">
+                            Show Attendance
                         </button>
                     </td>
                 </tr>
@@ -48,7 +51,7 @@
                         Participants for {{ dance_class.title }} ({{ dance_class.level }})
                     </h3>
 
-                    <table id="participants-table-{{ dance_class.id }}" class="table table-bordered"
+                    <table id="participants-table-{{ dance_class.id }}" class="table"
                            style="display: none;">
                         <thead>
                         <tr>
@@ -82,20 +85,112 @@
                 </div>
             {% endfor %}
         </div>
+
+        <div id="attendance-tables-container">
+            {% for dance_class, dates in grouped_attendances.items %}
+                <div id="attendance-section-{{ dance_class.id }}" style="margin-top: 20px;">
+                    <h3 id="attendance-title-{{ dance_class.id }}" style="display: none;">
+                        Attendance for {{ dance_class.title }} ({{ dance_class.level }})
+                    </h3>
+
+                    <table id="attendance-table-{{ dance_class.id }}" class="table"
+                           style="display: none;">
+                        <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Present</th>
+                            <th>Absent</th>
+                            <th>Late</th>
+                            <th>Pending</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for date, attendances in dates.items %}
+                            <tr>
+                                <td>{{ date }}</td>
+                                <td>
+                                    {{ attendances|filter_attendance:"present"|length }}
+                                </td>
+                                <td>
+                                    {{ attendances|filter_attendance:"absent"|length }}
+                                </td>
+                                <td>
+                                    {{ attendances|filter_attendance:"late"|length }}
+                                </td>
+                                <td>
+                                    {{ attendances|filter_attendance:"pending"|length }}
+                                </td>
+                                <td>
+                                    <button onclick="viewParticipants('{{ dance_class.id }}', '{{ date }}')"
+                                            class="btn-primary-subtle-sm">
+                                        View
+                                    </button>
+                                    <button class="btn-primary-subtle-sm">
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr id="attendance-details-{{ dance_class.id }}-{{ date }}" style="display: none;">
+                                <td colspan="6">
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>First Name</th>
+                                            <th>Last Name</th>
+                                            <th>Attendance Status</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="attendance-users-{{ dance_class.id }}-{{ date }}">
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 
     <script>
-        function toggleParticipants(tableId, titleId) {
-            const table = document.getElementById(tableId);
-            const title = document.getElementById(titleId);
+        const users = JSON.parse('{{ grouped_users_js|escapejs }}');
+        const attendanceData = JSON.parse('{{ grouped_attendances_js|escapejs }}');
 
-            if (table.style.display === "none") {
-                table.style.display = "table";
-                title.style.display = "block";
+        function viewParticipants(classId, date) {
+            const formattedDate = formatDate(date);
+
+            const detailsRow = document.getElementById('attendance-details-' + classId + '-' + date);
+            const usersContainer = document.getElementById('attendance-users-' + classId + '-' + date);
+
+            if (detailsRow) {
+                if (detailsRow.style.display === "none") {
+                    detailsRow.style.display = "table-row";
+
+                    const usersList = users[classId];
+                    const attendanceList = attendanceData[classId][formattedDate];
+
+                    usersContainer.innerHTML = '';
+
+                    usersList.forEach(user => {
+                        const attendance = attendanceList.find(att => att.user === user.id)
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                        <td>${user.first_name}</td>
+                        <td>${user.last_name}</td>
+                        <td>${attendance.status}</td>
+                    `;
+                        usersContainer.appendChild(row);
+                    });
+                } else {
+                    detailsRow.style.display = "none";
+                }
             } else {
-                table.style.display = "none";
-                title.style.display = "none";
+                console.error("No details row found for class " + classId + " and date " + formattedDate);
             }
         }
     </script>
+
+    <script src="{% static '/js/attendance_script.js' %}" defer></script>
 {% endblock %}

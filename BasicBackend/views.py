@@ -1,3 +1,6 @@
+import json
+from itertools import groupby
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
@@ -208,12 +211,39 @@ def dashboard(request):
 @user_passes_test(is_instructor)
 def manage_dance_classes(request):
     instructor_classes = DanceClass.objects.filter(instructor=request.user)
+    attendances = DanceClassAttendance.objects.filter(dance_class__in=instructor_classes).order_by(
+        'dance_class', 'session_date'
+    )
 
+    grouped_attendances = {}
+    for dance_class, class_group in groupby(attendances, key=lambda x: x.dance_class):
+        grouped_attendances[dance_class] = {}
+        for session_date, date_group in groupby(class_group, key=lambda x: x.session_date):
+            grouped_attendances[dance_class][session_date] = list(date_group)
+
+    grouped_attendances_js = {}
+    for dance_class, class_group in groupby(attendances, key=lambda x: x.dance_class):
+        grouped_attendances_js[dance_class.id] = {}
+        for session_date, date_group in groupby(class_group, key=lambda x: x.session_date):
+            session_date_str = session_date.strftime('%Y-%m-%d')
+            grouped_attendances_js[dance_class.id][session_date_str] = [
+                {'status': attendance.status, 'user': attendance.user.id}
+                for attendance in date_group
+            ]
+
+    grouped_users_js = {}
     for dance_class in instructor_classes:
-        dance_class.participants_list = dance_class.users.all()
+        grouped_users_js[dance_class.id] = [
+            {'first_name': user.first_name, 'last_name': user.last_name, 'id': user.id}
+            for user in dance_class.users.all()
+        ]
 
     return render(request, 'manage_dance_classes.html', {
         'instructor_classes': instructor_classes,
+        'attendances': attendances,
+        'grouped_attendances': grouped_attendances,
+        'grouped_attendances_js': json.dumps(grouped_attendances_js),
+        'grouped_users_js': json.dumps(grouped_users_js)
     })
 
 

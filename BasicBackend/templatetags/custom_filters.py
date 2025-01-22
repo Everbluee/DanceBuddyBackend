@@ -11,3 +11,8 @@ def filter_attendance(attendances, status):
 @register.filter
 def filter_user_group(group, class_id):
     return group[class_id]
+
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)

@@ -55,7 +55,7 @@ class DanceClass(models.Model):
 
     title = models.CharField(max_length=100)
     level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='beginner')
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     time = models.TimeField()
     days = MultiSelectField(choices=DAY_CHOICES)
     users = models.ManyToManyField('User', through='DanceClassAssignment', related_name='dance_classes')

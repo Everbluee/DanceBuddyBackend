@@ -2,14 +2,14 @@ import json
 from datetime import date
 from itertools import groupby
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .forms import DanceClassAttendanceForm, ClassAttendanceForm
+from .forms import DanceClassAttendanceForm, DanceClassForm, AddParticipantsForm
 from .serializers import *
 
 
@@ -230,6 +230,9 @@ def manage_dance_classes(request):
         'instructor_classes': instructor_classes,
         'attendances': attendances,
         'status_choices': status_choices,
+        'users': User.objects.filter(groups__name='Dancer'),
+        'instructors': User.objects.filter(groups__name='Instructor'),
+        'dance_classes': DanceClass.objects.filter(instructor=request.user),
         'grouped_attendances': grouped_attendances,
         'grouped_attendances_js': json.dumps(grouped_attendances_js),
         'grouped_users': grouped_users,
@@ -244,18 +247,50 @@ def create_attendance(request, dance_class_id):
     dance_class = DanceClass.objects.get(pk=dance_class_id)
 
     if request.method == 'POST':
-        form = ClassAttendanceForm(request.POST, dance_class_id=dance_class_id)
+        form = DanceClassAttendanceForm(request.POST, dance_class_id=dance_class_id)
         form.dance_class = dance_class
+
         if form.is_valid():
             form.save()
-            return JsonResponse({"success": True})
+            messages.success(request, "Attendance created successfully.")
         else:
-            return JsonResponse({"success": False, "error": form.errors.as_json()})
+            messages.error(request, "There was an error with the form. Please try again.")
+
+    return redirect(request.META.get('HTTP_REFERER', 'manage_dance_classes'))
+
+
+@login_required
+@user_passes_test(is_instructor)
+def create_dance_class(request):
+    if request.method == 'POST':
+        form = DanceClassForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Dance class created successfully.")
+        else:
+            messages.error(request, "There was an error with the form. Please try again.")
+
+    return redirect(request.META.get('HTTP_REFERER', 'manage_dance_classes'))
+
+
+@login_required
+@user_passes_test(is_instructor)
+def add_participant(request, dance_class_id):
+    dance_class = DanceClass.objects.get(pk=dance_class_id)
+
+    if request.method == 'POST':
+        form = AddParticipantsForm(request.POST, instance=dance_class)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Participants created successfully.")
     else:
-        form = DanceClassAttendanceForm(dance_class_id=dance_class_id)
+        messages.error(request, "There was an error with the form. Please try again.")
 
-    return render(request, 'attendance_modal.html', {'form': form, 'dance_class': dance_class})
+    return redirect(request.META.get('HTTP_REFERER', 'manage_dance_classes'))
 
 
+@login_required
+@user_passes_test(is_instructor)
 def manage_events(request):
     return render(request, 'manage_events.html')

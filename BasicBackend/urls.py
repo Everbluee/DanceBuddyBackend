@@ -33,6 +33,8 @@ user_patterns = [
 
 manage_dance_classes_patterns = [
     path('', manage_dance_classes, name='manage_dance_classes'),
+    path('create-dance-class/', create_dance_class, name='create_dance_class'),
+    path('add-participant/<int:dance_class_id>/', add_participant, name='add_participant'),
     path('create-attendance/<int:dance_class_id>/', create_attendance, name='create_attendance'),
 ]
 

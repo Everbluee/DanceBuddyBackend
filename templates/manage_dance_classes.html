@@ -1,6 +1,6 @@
 {% extends 'base_generic.html' %}
 {% load static %}
-{% load attendance_filter %}
+{% load custom_filters %}
 
 {% block title %}Manage Dance Classes{% endblock %}
 
@@ -10,13 +10,20 @@
 
 {% block content %}
     <div class="container mt-4">
-        <h1 class="text-center">Manage Dance Classes</h1>
+        <div class="custom-row" style="justify-content: center">
+            <h1 class="text-center">Manage Dance Classes</h1>
+
+            <button class="btn-primary-subtle-sm" data-bs-toggle="modal" data-bs-target="#createDanceClassModal">
+                Create new dance class
+            </button>
+        </div>
         <table class="table mt-4">
             <thead>
             <tr>
                 <th>Class</th>
                 <th>Level</th>
                 <th>Days</th>
+                <th>Time</th>
                 <th>Description</th>
                 <th>Actions</th>
             </tr>
@@ -27,6 +34,7 @@
                     <td style="vertical-align: middle">{{ dance_class.title }}</td>
                     <td style="vertical-align: middle">{{ dance_class.level.capitalize }}</td>
                     <td style="vertical-align: middle">{{ dance_class.days }}</td>
+                    <td style="vertical-align: middle">{{ dance_class.time }}</td>
                     <td style="vertical-align: middle">{{ dance_class.description }}</td>
                     <td style="vertical-align: middle">
                         <button class="btn-primary-subtle-sm"
@@ -34,7 +42,7 @@
                                         'participants-table-{{ dance_class.id }}',
                                         'participants-title-{{ dance_class.id }}'
                                         )">
-                            Show Participants
+                            Participants
                         </button>
 
                         <button class="btn-primary-subtle-sm"
@@ -42,7 +50,7 @@
                                         'attendance-table-{{ dance_class.id }}',
                                         'attendance-title-{{ dance_class.id }}'
                                         )">
-                            Show Attendance
+                            Attendance
                         </button>
                     </td>
                 </tr>
@@ -53,9 +61,16 @@
         <div id="participants-tables-container">
             {% for dance_class in instructor_classes %}
                 <div id="participants-section-{{ dance_class.id }}" style="margin-top: 20px;">
-                    <h3 id="participants-title-{{ dance_class.id }}" class="hidden">
-                        Participants for {{ dance_class.title }} ({{ dance_class.level }})
-                    </h3>
+                    <div class="custom-row hidden" id="participants-title-{{ dance_class.id }}">
+                        <h3>
+                            Participants for {{ dance_class.title }} ({{ dance_class.level }})
+                        </h3>
+
+                        <button class="btn-primary-subtle-sm" data-bs-toggle="modal"
+                                data-bs-target="#addParticipantModal">
+                            Add
+                        </button>
+                    </div>
 
                     <table id="participants-table-{{ dance_class.id }}" class="table hidden">
                         <thead>
@@ -88,11 +103,42 @@
                         </tbody>
                     </table>
                 </div>
+
+                <div class="modal fade" id="addParticipantModal" tabindex="-1"
+                     aria-labelledby="addParticipantModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addParticipantModalLabel">Add New Participant</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+
+                                <form id="addParticipantForm" method="post"
+                                      action="{% url 'add_participant' dance_class.id %}">
+                                    {% csrf_token %}
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label for="id_participant">Participant:</label>
+                                            <select class="form-control" id="id_participant" name="user">
+                                                {% for user in users %}
+                                                    <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary-subtle-sm">Save</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             {% endfor %}
         </div>
 
         <div id="attendance-tables-container">
-            {% for dance_class, dates in grouped_attendances.items %}
+            {% for dance_class in dance_classes %}
                 <div id="attendance-section-{{ dance_class.id }}" style="margin-top: 20px;">
                     <div class="custom-row hidden" id="attendance-title-{{ dance_class.id }}">
                         <h3>
@@ -101,7 +147,7 @@
 
                         <button class="btn-primary-subtle-sm" data-bs-toggle="modal"
                                 data-bs-target="#createAttendanceModal-{{ dance_class.id }}">
-                            Create
+                            Create attendance
                         </button>
                     </div>
 
@@ -117,44 +163,54 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for date, attendances in dates.items %}
-                            <tr>
-                                <td style="vertical-align: middle">{{ date }}</td>
-                                <td style="vertical-align: middle">
-                                    {{ attendances|filter_attendance:"present"|length }}
-                                </td>
-                                <td style="vertical-align: middle">
-                                    {{ attendances|filter_attendance:"absent"|length }}
-                                </td>
-                                <td style="vertical-align: middle">
-                                    {{ attendances|filter_attendance:"late"|length }}
-                                </td>
-                                <td style="vertical-align: middle">
-                                    {{ attendances|filter_attendance:"pending"|length }}
-                                </td>
-                                <td style="vertical-align: middle">
-                                    <button onclick="viewParticipants('{{ dance_class.id }}', '{{ date }}')"
-                                            class="btn-primary-subtle-sm" style="flex-shrink: 1">
-                                        View
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr id="attendance-details-{{ dance_class.id }}-{{ date }}" style="display: none;">
-                                <td colspan="6">
-                                    <table class="table">
-                                        <thead>
-                                        <tr>
-                                            <th>First Name</th>
-                                            <th>Last Name</th>
-                                            <th>Attendance Status</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="attendance-users-{{ dance_class.id }}-{{ date }}">
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                        {% endfor %}
+                        {% with grouped_attendances|get_item:dance_class as dance_class_attendances %}
+                            {% if dance_class_attendances %}
+                                {% for date, attendances in dance_class_attendances.items %}
+                                    <tr>
+                                        <td style="vertical-align: middle">{{ date }}</td>
+                                        <td style="vertical-align: middle">
+                                            {{ attendances|filter_attendance:"present"|length }}
+                                        </td>
+                                        <td style="vertical-align: middle">
+                                            {{ attendances|filter_attendance:"absent"|length }}
+                                        </td>
+                                        <td style="vertical-align: middle">
+                                            {{ attendances|filter_attendance:"late"|length }}
+                                        </td>
+                                        <td style="vertical-align: middle">
+                                            {{ attendances|filter_attendance:"pending"|length }}
+                                        </td>
+                                        <td style="vertical-align: middle">
+                                            <button onclick="viewParticipants('{{ dance_class.id }}', '{{ date }}')"
+                                                    class="btn-primary-subtle-sm" style="flex-shrink: 1">
+                                                View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr id="attendance-details-{{ dance_class.id }}-{{ date }}" style="display: none;">
+                                        <td colspan="6">
+                                            <table class="table">
+                                                <thead>
+                                                <tr>
+                                                    <th>First Name</th>
+                                                    <th>Last Name</th>
+                                                    <th>Attendance Status</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody id="attendance-users-{{ dance_class.id }}-{{ date }}">
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        <strong>No attendances for this class.</strong>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endwith %}
                         </tbody>
                     </table>
                 </div>
@@ -169,6 +225,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                         aria-label="Close"></button>
                             </div>
+
                             <form id="attendanceForm-{{ dance_class.id }}" method="post"
                                   action="{% url 'create_attendance' dance_class.id %}">
                                 {% csrf_token %}
@@ -205,8 +262,6 @@
                                 </div>
 
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
-                                    </button>
                                     <button type="submit" class="btn btn-primary-subtle-sm">Save Attendance</button>
                                 </div>
                             </form>
@@ -216,6 +271,108 @@
 
             {% endfor %}
         </div>
+
+        <div class="modal fade" id="createDanceClassModal" tabindex="-1"
+             aria-labelledby="createDanceClassModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createDanceClassModalLabel">Create New Dance Class</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+
+                    <form id="danceClassForm" method="post" action="{% url 'create_dance_class' %}">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="id_title">Title:</label>
+                                <input type="text" class="form-control" id="id_title" name="title" maxlength="100">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_level">Level:</label>
+                                <select class="form-control" id="id_level" name="level">
+                                    <option value="beginner">Beginner</option>
+                                    <option value="intermediate">Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_description">Description:</label>
+                                <textarea class="form-control" id="id_description" name="description"
+                                          rows="4"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_time">Time:</label>
+                                <input type="time" class="form-control" id="id_time" name="time">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_days">Days:</label>
+                                <div>
+                                    <label><input type="checkbox" name="days" value="monday"> Monday</label><br>
+                                    <label><input type="checkbox" name="days" value="tuesday"> Tuesday</label><br>
+                                    <label><input type="checkbox" name="days" value="wednesday"> Wednesday</label><br>
+                                    <label><input type="checkbox" name="days" value="thursday"> Thursday</label><br>
+                                    <label><input type="checkbox" name="days" value="friday"> Friday</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_users">Participants:</label>
+                                <div>
+                                    {% for user in users %}
+                                        <label><input type="checkbox" name="users"
+                                                      value="{{ user.id }}"> {{ user.first_name }} {{ user.last_name }}
+                                        </label><br>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_instructor">Instructor:</label>
+                                <select class="form-control" id="id_instructor" name="instructor">
+                                    {% for instructor in instructors %}
+                                        <option value="{{ instructor.id }}">{{ instructor.first_name }} {{ instructor.last_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary-subtle-sm">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+            <div class="modal fade" id="responseModal" tabindex="-1" aria-labelledby="responseModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="responseModalLabel">Response</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 
     <script>
@@ -254,6 +411,11 @@
                 console.error("No details row found for class " + classId + " and date " + formattedDate);
             }
         }
+
+        {% if messages %}
+            const myModal = new bootstrap.Modal(document.getElementById('responseModal'));
+            myModal.show();
+        {% endif %}
     </script>
     <script src="{% static '/js/attendance_script.js' %}" defer></script>
 {% endblock %}

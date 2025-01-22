@@ -10,11 +10,6 @@ function toggleTable(tableId, titleId) {
     const table = document.getElementById(tableId);
     const title = document.getElementById(titleId);
 
-    if (table.style.display === "none") {
-        table.style.display = "table";
-        title.style.display = "block";
-    } else {
-        table.style.display = "none";
-        title.style.display = "none";
-    }
+    table.classList.toggle('hidden');
+    title.classList.toggle('hidden');
 }

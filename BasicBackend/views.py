@@ -1,14 +1,15 @@
 import json
+from datetime import date
 from itertools import groupby
 
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from .forms import DanceClassAttendanceForm, ClassAttendanceForm
 from .serializers import *
 
 
@@ -166,32 +167,6 @@ def is_instructor(user):
     return user.groups.filter(name='Instructor').exists()
 
 
-@login_required
-@user_passes_test(is_instructor)
-def save_dance_class_attendance(request, class_id):
-    if request.method == "POST":
-        dance_class = get_object_or_404(DanceClass, id=class_id)
-
-        if dance_class.instructor != request.user:
-            return JsonResponse({'error': 'Unauthorized'}, status=403)
-
-        for key, value in request.POST.items():
-            if key.startswith("attendances-"):
-                user_id = key.split("-")[1]
-                try:
-                    user = User.objects.get(id=user_id)
-                    attendance, created = DanceClassAttendance.objects.get_or_create(user=user, dance_class=dance_class)
-                    attendance.status = value
-                    attendance.save()
-                except User.DoesNotExist:
-                    continue
-
-        messages.success(request, "Attendance successfully saved!")
-        return redirect('manage_dance_classes')
-
-    return JsonResponse({'error': 'Invalid request'}, status=400)
-
-
 def home(request):
     is_user_instructor = is_instructor(request.user)
     return render(request, 'home.html', {'is_instructor': is_user_instructor})
@@ -214,6 +189,12 @@ def manage_dance_classes(request):
     attendances = DanceClassAttendance.objects.filter(dance_class__in=instructor_classes).order_by(
         'dance_class', 'session_date'
     )
+    status_choices = [
+        ('pending', 'Pending'),
+        ('present', 'Present'),
+        ('absent', 'Absent'),
+        ('late', 'Late'),
+    ]
 
     grouped_attendances = {}
     for dance_class, class_group in groupby(attendances, key=lambda x: x.dance_class):
@@ -238,13 +219,42 @@ def manage_dance_classes(request):
             for user in dance_class.users.all()
         ]
 
+    grouped_users = {}
+    for dance_class in instructor_classes:
+        grouped_users[dance_class.id] = [
+            {'first_name': user.first_name, 'last_name': user.last_name, 'id': user.id}
+            for user in dance_class.users.all()
+        ]
+
     return render(request, 'manage_dance_classes.html', {
         'instructor_classes': instructor_classes,
         'attendances': attendances,
+        'status_choices': status_choices,
         'grouped_attendances': grouped_attendances,
         'grouped_attendances_js': json.dumps(grouped_attendances_js),
-        'grouped_users_js': json.dumps(grouped_users_js)
+        'grouped_users': grouped_users,
+        'grouped_users_js': json.dumps(grouped_users_js),
+        'today_date': date.today().strftime('%Y-%m-%d'),
     })
+
+
+@login_required
+@user_passes_test(is_instructor)
+def create_attendance(request, dance_class_id):
+    dance_class = DanceClass.objects.get(pk=dance_class_id)
+
+    if request.method == 'POST':
+        form = ClassAttendanceForm(request.POST, dance_class_id=dance_class_id)
+        form.dance_class = dance_class
+        if form.is_valid():
+            form.save()
+            return JsonResponse({"success": True})
+        else:
+            return JsonResponse({"success": False, "error": form.errors.as_json()})
+    else:
+        form = DanceClassAttendanceForm(dance_class_id=dance_class_id)
+
+    return render(request, 'attendance_modal.html', {'form': form, 'dance_class': dance_class})
 
 
 def manage_events(request):

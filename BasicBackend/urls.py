@@ -31,14 +31,13 @@ user_patterns = [
     path('update/<int:pk>/', update_data_user, name='update_user'),
 ]
 
-attendance_patterns = [
-    path('dance_class/<int:class_id>/save_attendance/', save_dance_class_attendance,
-         name='save_dance_class_attendance'),
+manage_dance_classes_patterns = [
+    path('', manage_dance_classes, name='manage_dance_classes'),
+    path('create-attendance/<int:dance_class_id>/', create_attendance, name='create_attendance'),
 ]
 
 management_patterns = [
-    path('dance_class/', manage_dance_classes, name='manage_dance_classes'),
-    path('attendance/', include(attendance_patterns)),
+    path('dance_class/', include(manage_dance_classes_patterns)),
     path('event/', manage_events, name='manage_events'),
 ]
 

@@ -24,18 +24,24 @@
             <tbody>
             {% for dance_class in instructor_classes %}
                 <tr>
-                    <td>{{ dance_class.title }}</td>
-                    <td>{{ dance_class.level.capitalize }}</td>
-                    <td>{{ dance_class.days }}</td>
-                    <td>{{ dance_class.description }}</td>
-                    <td>
+                    <td style="vertical-align: middle">{{ dance_class.title }}</td>
+                    <td style="vertical-align: middle">{{ dance_class.level.capitalize }}</td>
+                    <td style="vertical-align: middle">{{ dance_class.days }}</td>
+                    <td style="vertical-align: middle">{{ dance_class.description }}</td>
+                    <td style="vertical-align: middle">
                         <button class="btn-primary-subtle-sm"
-                                onclick="toggleTable('participants-table-{{ dance_class.id }}', 'participants-title-{{ dance_class.id }}')">
+                                onclick="toggleTable(
+                                        'participants-table-{{ dance_class.id }}',
+                                        'participants-title-{{ dance_class.id }}'
+                                        )">
                             Show Participants
                         </button>
 
                         <button class="btn-primary-subtle-sm"
-                                onclick="toggleTable('attendance-table-{{ dance_class.id }}', 'attendance-title-{{ dance_class.id }}')">
+                                onclick="toggleTable(
+                                        'attendance-table-{{ dance_class.id }}',
+                                        'attendance-title-{{ dance_class.id }}'
+                                        )">
                             Show Attendance
                         </button>
                     </td>
@@ -47,12 +53,11 @@
         <div id="participants-tables-container">
             {% for dance_class in instructor_classes %}
                 <div id="participants-section-{{ dance_class.id }}" style="margin-top: 20px;">
-                    <h3 id="participants-title-{{ dance_class.id }}" style="display: none;">
+                    <h3 id="participants-title-{{ dance_class.id }}" class="hidden">
                         Participants for {{ dance_class.title }} ({{ dance_class.level }})
                     </h3>
 
-                    <table id="participants-table-{{ dance_class.id }}" class="table"
-                           style="display: none;">
+                    <table id="participants-table-{{ dance_class.id }}" class="table hidden">
                         <thead>
                         <tr>
                             <th>First name</th>
@@ -89,12 +94,18 @@
         <div id="attendance-tables-container">
             {% for dance_class, dates in grouped_attendances.items %}
                 <div id="attendance-section-{{ dance_class.id }}" style="margin-top: 20px;">
-                    <h3 id="attendance-title-{{ dance_class.id }}" style="display: none;">
-                        Attendance for {{ dance_class.title }} ({{ dance_class.level }})
-                    </h3>
+                    <div class="custom-row hidden" id="attendance-title-{{ dance_class.id }}">
+                        <h3>
+                            Attendance for {{ dance_class.title }} ({{ dance_class.level }})
+                        </h3>
 
-                    <table id="attendance-table-{{ dance_class.id }}" class="table"
-                           style="display: none;">
+                        <button class="btn-primary-subtle-sm" data-bs-toggle="modal"
+                                data-bs-target="#createAttendanceModal-{{ dance_class.id }}">
+                            Create
+                        </button>
+                    </div>
+
+                    <table class="table hidden" id="attendance-table-{{ dance_class.id }}">
                         <thead>
                         <tr>
                             <th>Date</th>
@@ -108,26 +119,23 @@
                         <tbody>
                         {% for date, attendances in dates.items %}
                             <tr>
-                                <td>{{ date }}</td>
-                                <td>
+                                <td style="vertical-align: middle">{{ date }}</td>
+                                <td style="vertical-align: middle">
                                     {{ attendances|filter_attendance:"present"|length }}
                                 </td>
-                                <td>
+                                <td style="vertical-align: middle">
                                     {{ attendances|filter_attendance:"absent"|length }}
                                 </td>
-                                <td>
+                                <td style="vertical-align: middle">
                                     {{ attendances|filter_attendance:"late"|length }}
                                 </td>
-                                <td>
+                                <td style="vertical-align: middle">
                                     {{ attendances|filter_attendance:"pending"|length }}
                                 </td>
-                                <td>
+                                <td style="vertical-align: middle">
                                     <button onclick="viewParticipants('{{ dance_class.id }}', '{{ date }}')"
-                                            class="btn-primary-subtle-sm">
+                                            class="btn-primary-subtle-sm" style="flex-shrink: 1">
                                         View
-                                    </button>
-                                    <button class="btn-primary-subtle-sm">
-                                        Edit
                                     </button>
                                 </td>
                             </tr>
@@ -150,6 +158,62 @@
                         </tbody>
                     </table>
                 </div>
+
+                <div class="modal fade" id="createAttendanceModal-{{ dance_class.id }}" tabindex="-1"
+                     aria-labelledby="createAttendanceModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createAttendanceModalLabel">Create Attendance
+                                    for {{ dance_class.title }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <form id="attendanceForm-{{ dance_class.id }}" method="post"
+                                  action="{% url 'create_attendance' dance_class.id %}">
+                                {% csrf_token %}
+                                <div class="modal-body">
+                                    <input type="hidden" name="dance_class" value="{{ dance_class.id }}">
+
+                                    <div class="form-group">
+                                        <label class="col-form-label">
+                                            Session date:
+                                            <input type="date" class="form-control" id="session_date"
+                                                   name="session_date" value="{{ today_date }}">
+                                        </label>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="user">Participant:</label>
+                                        <select class="form-control" id="user" name="user">
+                                            {% with grouped_users|filter_user_group:dance_class.id as user_group %}
+                                                {% for user in user_group %}
+                                                    <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                                                {% endfor %}
+                                            {% endwith %}
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="status">Status:</label>
+                                        <select class="form-control" id="status" name="status">
+                                            {% for key, value in status_choices %}
+                                                <option value="{{ key }}">{{ value }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                                    </button>
+                                    <button type="submit" class="btn btn-primary-subtle-sm">Save Attendance</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
             {% endfor %}
         </div>
     </div>
@@ -191,6 +255,5 @@
             }
         }
     </script>
-
     <script src="{% static '/js/attendance_script.js' %}" defer></script>
 {% endblock %}

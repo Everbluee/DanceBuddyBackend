@@ -22,9 +22,11 @@ class DanceClassSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
+    users = UserSerializer(many=True, read_only=True)
+
     class Meta:
         model = Event
-        fields = '__all__'
+        fields = ['id', 'title', 'description', 'time', 'date', 'location', 'users']
 
     def get_event_picture(self, obj):
         return obj.image.url

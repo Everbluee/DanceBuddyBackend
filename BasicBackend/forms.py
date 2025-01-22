@@ -72,7 +72,18 @@ class AddParticipantsForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        dance_class_id = kwargs.pop('dance_class_id', None)
+        dance_class = DanceClass.objects.get(pk=dance_class_id)
         super().__init__(*args, **kwargs)
-        dance_class = kwargs.get('instance')
 
         self.fields['dance_class'].initial = dance_class
+
+    def clean(self):
+        cleaned_data = super().clean()
+        user = cleaned_data.get('user')
+        dance_class = cleaned_data.get('dance_class')
+
+        if DanceClassAssignment.objects.filter(user=user, dance_class=dance_class).exists():
+            raise forms.ValidationError("This participant already exists in this class.")
+
+        return cleaned_data

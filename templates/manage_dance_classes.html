@@ -117,6 +117,9 @@
                                       action="{% url 'add_participant' dance_class.id %}">
                                     {% csrf_token %}
                                     <div class="modal-body">
+                                        <input type="hidden" value="{{ dance_class.id }}" id="dance_class"
+                                               name="dance_class">
+
                                         <div class="form-group">
                                             <label for="id_participant">Participant:</label>
                                             <select class="form-control" id="id_participant" name="user">

@@ -244,11 +244,8 @@ def manage_dance_classes(request):
 @login_required
 @user_passes_test(is_instructor)
 def create_attendance(request, dance_class_id):
-    dance_class = DanceClass.objects.get(pk=dance_class_id)
-
     if request.method == 'POST':
         form = DanceClassAttendanceForm(request.POST, dance_class_id=dance_class_id)
-        form.dance_class = dance_class
 
         if form.is_valid():
             form.save()
@@ -277,15 +274,15 @@ def create_dance_class(request):
 @login_required
 @user_passes_test(is_instructor)
 def add_participant(request, dance_class_id):
-    dance_class = DanceClass.objects.get(pk=dance_class_id)
-
     if request.method == 'POST':
-        form = AddParticipantsForm(request.POST, instance=dance_class)
+        form = AddParticipantsForm(request.POST, dance_class_id=dance_class_id)
+
         if form.is_valid():
             form.save()
             messages.success(request, "Participants created successfully.")
-    else:
-        messages.error(request, "There was an error with the form. Please try again.")
+        else:
+            print(form.errors)
+            messages.error(request, "There was an error with the form. Please try again.")
 
     return redirect(request.META.get('HTTP_REFERER', 'manage_dance_classes'))
 
